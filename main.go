@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -36,15 +38,7 @@ func main() {
 func handleInline(bot *tgbotapi.BotAPI, inlineQuery *tgbotapi.InlineQuery) {
 	lowercased := strings.ToLower(inlineQuery.Query)
 
-	result := ""
-
-	for i, letter := range lowercased {
-		if i%2 != 0 {
-			result += strings.ToUpper(string(letter))
-		} else {
-			result += string(letter)
-		}
-	}
+	result := buildResult(lowercased)
 
 	article := tgbotapi.NewInlineQueryResultArticle(inlineQuery.ID, "✨ Chonizado ✨", result)
 	article.Description = result
@@ -58,5 +52,45 @@ func handleInline(bot *tgbotapi.BotAPI, inlineQuery *tgbotapi.InlineQuery) {
 
 	if _, err := bot.Request(inlineConf); err != nil {
 		log.Println(err)
+	}
+}
+
+func buildResult(inputQuery string) string {
+	result := ""
+
+	for i, letter := range inputQuery {
+		repeatTimes := 1
+
+		switch letter {
+		case 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U':
+			repeatTimes = random()
+		}
+
+		for j := 1; j <= repeatTimes; j++ {
+			if i%2 != 0 {
+				result += strings.ToUpper(string(letter))
+			} else {
+				result += string(letter)
+			}
+		}
+	}
+
+	return result
+}
+
+func random() int {
+	rand.Seed(time.Now().UnixNano())
+
+	switch randomNumber := rand.Intn(100) + 1; {
+	case randomNumber > 40:
+		return 1
+	case randomNumber > 30:
+		return 2
+	case randomNumber > 20:
+		return 3
+	case randomNumber > 10:
+		return 4
+	default:
+		return 5
 	}
 }
