@@ -1,13 +1,9 @@
-FROM golang:1.19-alpine3.17
-
-RUN apk add --no-cache git
-
-WORKDIR /app/chonizabot
-
-COPY go.mod .
-
-RUN go mod download
-
+FROM golang:alpine AS build
+WORKDIR /go/src/myapp
 COPY . .
+RUN go build -o /go/bin/myapp main.go
 
-ENTRYPOINT ["go", "run", "main.go"]
+FROM scratch
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /go/bin/myapp /go/bin/myapp
+ENTRYPOINT ["/go/bin/myapp"]
